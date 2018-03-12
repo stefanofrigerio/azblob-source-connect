@@ -1,0 +1,1 @@
+CREATE USER azconnect with password 'test_azblob';
