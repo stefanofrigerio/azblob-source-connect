@@ -13,11 +13,9 @@ public class AZBlobConnector {
     public static void main(String... args){
         Status.addStatus();
         Status.addCfg();
-        while(true)
-        {
 
-        }
-        //AZblobClient client = AZblobClient.getClient();
+        AZblobClient client = AZblobClient.getClient();
+
 
     }
 }

@@ -4,16 +4,20 @@ import com.generali.aateam.connectors.config.Config;
 import org.apache.log4j.Logger;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class DatabaseClient {
 
     final static Logger logger = Logger.getLogger(DatabaseClient.class);
-    private final String insertQuery="insert into processed_blobs values (?)";
-    private static Connection conn;
-    private static DatabaseClient ourInstance = new DatabaseClient();
+    private final String insertQuery="insert into processed_blobs values (?,?)";
+    private final String fetchQuery="select hash from processed_blobs";
+    private Connection conn;
+    private static DatabaseClient ourInstance;
+    private ArrayList list; //cache
 
     public static DatabaseClient getInstance() {
+        if (ourInstance==null) return new DatabaseClient();
         return ourInstance;
     }
 
@@ -34,12 +38,34 @@ public class DatabaseClient {
         try {
             PreparedStatement pst = conn.prepareStatement(insertQuery);
             pst.setString(1,MD5);
+            pst.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
             int result = pst.executeUpdate();
-            if (result==1) return true; else return false;
+            if (result==1) {
+                list = null; //clear cache
+                return true;
+            }
+            else return false;
         } catch (SQLException ex){
-            logger.error("error during insert queryS: "+ex);
+            logger.error("error during insert query: "+ex);
             return false;
         }
 
+    }
+
+    public ArrayList getFileList(){
+        if(list != null) return list;
+        list=new ArrayList();
+        try {
+            PreparedStatement pst = conn.prepareStatement(fetchQuery);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()){
+                list.add(rs.getString("hash"));
+            }
+        } catch (SQLException ex){
+            logger.error("error during fetch query: "+ex);
+        }
+        finally {
+            return list;
+        }
     }
 }

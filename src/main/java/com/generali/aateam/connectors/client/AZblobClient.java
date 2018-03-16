@@ -6,12 +6,16 @@ import com.microsoft.azure.storage.blob.*;
 import kafka.utils.json.JsonObject;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class AZblobClient {
 
     final static Logger logger = Logger.getLogger(Config.class);
     private static AZblobClient instance;
     private CloudStorageAccount account;
     private CloudBlobClient blobClient;
+    CloudBlobContainer container;
 
     public static AZblobClient getClient(){
         if (instance==null) {
@@ -31,9 +35,9 @@ public class AZblobClient {
             logger.debug("connection string: "+storageConnectionString);
             account = CloudStorageAccount.parse(storageConnectionString);
 
-            CloudBlobClient serviceClient = account.createCloudBlobClient();
+            blobClient = account.createCloudBlobClient();
             //logger.debug(serviceClient.getServiceStats().toString());
-            CloudBlobContainer container = serviceClient.getContainerReference(Config.getConfig().getValue(Config.CONFIG_CONTAINER_REFERENCE));
+            container = blobClient.getContainerReference(Config.getConfig().getValue(Config.CONFIG_CONTAINER_REFERENCE));
             logger.debug(container.getName());
 
             for (ListBlobItem blobItem : container.listBlobs()) {
@@ -66,6 +70,14 @@ public class AZblobClient {
             System.exit(-1);
         }
     }
+
+    public void walkAndDownload(){
+        ArrayList list = DatabaseClient.getInstance().getFileList();
+        container.get;
+    }
+
+
+
     private JsonObject getJsonFile(){
         //File downloadedFile = new File();
         return null;
